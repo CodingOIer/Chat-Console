@@ -11,13 +11,13 @@ admin_token = ''
 api = flask.Flask('API')
 
 
+who = dict()
 keys = dict()
 mute = dict()
 black = dict()
 online = dict()
 whatKey = dict()
 nameUse = dict()
-username = dict()
 registerIP = dict()
 
 whileList = False
@@ -67,9 +67,9 @@ def adminConsole():
             f'成功删除用户密钥： {js['key']} ，操作 ip： {flask.request.remote_addr}'
         )
         try:
-            registerIP.pop(username[js['key']])
-            whatKey.pop(username[js['key']])
-            username.pop(js['key'])
+            registerIP.pop(who[js['key']])
+            whatKey.pop(who[js['key']])
+            who.pop(js['key'])
         except:
             pass
         return flask.Response(f'成功删除用户密钥：{ js['key']}', 200)
@@ -97,11 +97,11 @@ def mainAPIConsole():
         log.warning(f'来自封禁 ip {flask.request.remote_addr} 的登陆尝试')
         return flask.Response(f'你的 ip 地址已被封禁', 404)
     js = json.loads(flask.request.data)
-    if keys.get(js['token'], False):
+    if not keys.get(js['token'], False):
         log.warning(f'无法校验的 Token，来自 {flask.request.remote_addr}')
         return flask.Response('无法校验的 Token，请重试', 401)
     if js['do'] == 'register':
-        if username.get(js['token'], None) != None:
+        if who.get(js['token'], None) != None:
             log.info(f'{js['token']} 想要再次注册')
             return flask.Response('你已经注册', 400)
         else:
@@ -111,12 +111,16 @@ def mainAPIConsole():
             elif nameUse.get(js['username'], False):
                 log.warning(f'用户 Token {js['token']} 重复注册为 {js['username']}')
                 return flask.Response('用户名已存在', 400)
-            whatKey[js['token']] = js['username']
+            who[js['token']] = js['username']
+            whatKey[js['username']] = js['token']
             nameUse[js['username']] = True
             log.success(f'{js['token']} 注册为了 {js['username']}')
             registerIP[js['token']] = flask.request.remote_addr
             return flask.Response(f'成功注册为 {js['username']}', 200)
     elif js['do'] == 'send':
+        if who.get(js['token'], None) == None:
+            log.warning(f'来自 {js['token']} 未注册但是希望发送消息')
+            return flask.Response('你尚未注册', 400)
         message.append(
             {
                 'username': js['username'],
