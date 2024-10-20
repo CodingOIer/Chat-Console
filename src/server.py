@@ -126,7 +126,7 @@ def mainAPIConsole():
             return flask.Response('你已被禁言', 400)
         message.append(
             {
-                'username': js['username'],
+                'username': who[js['token']],
                 'ip': flask.request.remote_addr,
                 'sendto': js['sendto'],
                 'message': js['message'],
@@ -150,7 +150,7 @@ def mainAPIConsole():
             log.success(f'来自 {js['token']} 查询的 {js['username']} 用户信息')
             return flask.Response(json.dumps(data), 200)
     elif js['do'] == 'messages':
-        username = keys[js['token']]
+        username = who.get(js['token'], '$NONE')
         res = list()
         for x in message:
             if (
@@ -160,6 +160,7 @@ def mainAPIConsole():
             ):
                 res.append(
                     {
+                        'you': x['username'] == username,
                         'username': x['username'],
                         'sendto': x['sendto'],
                         'message': x['message'],
