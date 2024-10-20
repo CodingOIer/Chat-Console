@@ -1,0 +1,4 @@
+flask
+loguru
+PyQt5
+requests
