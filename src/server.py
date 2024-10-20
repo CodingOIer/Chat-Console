@@ -167,6 +167,9 @@ def mainAPIConsole():
                 )
         log.success(f'来自 {js['token']} 的历史消息请求，一共 {len(res)} 条')
         return flask.Response(json.dumps(res), 200)
+    else:
+        log.warning(f'未知命令，操作 ip： {flask.request.remote_addr}')
+        return flask.Response(f'未知命令', 404)
 
 
 if __name__ == '__main__':
