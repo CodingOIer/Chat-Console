@@ -30,7 +30,7 @@ def getToken(length=64):
     return ''.join(secrets.choice(characters) for _ in range(length))
 
 
-@api.route('/admin', methods=['POST'])
+@api.route('/root', methods=['POST'])
 def adminConsole():
     if (
         black.get(flask.request.remote_addr, whileList)
@@ -121,6 +121,9 @@ def mainAPIConsole():
         if who.get(js['token'], None) == None:
             log.warning(f'来自 {js['token']} 未注册但是希望发送消息')
             return flask.Response('你尚未注册', 400)
+        if mute.get(js['token'], False):
+            log.warning(f'用户 {js['token']} 已被禁言，但是仍然请求发送私信')
+            return flask.Response('你已被禁言', 400)
         message.append(
             {
                 'username': js['username'],
